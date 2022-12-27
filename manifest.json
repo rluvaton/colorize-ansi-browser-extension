@@ -1,0 +1,15 @@
+{
+  "name": "Colorize ANSI",
+  "manifest_version": 3,
+  "action": {},
+  "version": "0.1",
+  "description": "Replace <pre> tags that contains ansi colors with colored <pre> tags",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": ["*://*/"],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
