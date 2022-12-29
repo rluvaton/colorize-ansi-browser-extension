@@ -1,5 +1,4 @@
 <div align="center">
-<h1>Colorize ANSI Chrome extension</h1>
 
 <a href="./images/icon.png">
   <img
@@ -10,13 +9,14 @@
   />
 </a>
 
+<h1>Colorize ANSI Chrome extension</h1>
+
 <p>Colorize ANSI colors in Jenkins complete log page</p>
 
 </div>
 
-
-![Before](./images/before.png)
-
-![After](./images/after.png)
+| Before | After
+| ------ | ------ 
+| ![Before](./images/before.png) | ![After](./images/after.png)
 
 The icon was taken from https://github.com/iliazeus/vscode-ansi
