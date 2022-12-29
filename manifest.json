@@ -3,6 +3,9 @@
   "manifest_version": 3,
   "action": {},
   "version": "0.1",
+  "icons": {
+    "128": "images/icons/icon-128.png"
+  },
   "description": "Replace <pre> tags that contains ansi colors with colored <pre> tags",
   "permissions": [
     "activeTab",

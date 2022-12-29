@@ -1,11 +1,11 @@
 <div align="center">
 
-<a href="./images/icon.png">
+<a href="./images/icons/icon-128.png">
   <img
     height="80"
     width="80"
     alt="icon"
-    src="./images/icon.png"
+    src="./images/icons/icon-128.png"
   />
 </a>
 
