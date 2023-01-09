@@ -9,19 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
 
-      - name: zip
-        uses: nguyenquyhy/zip-release@v0.3.0
-        with:
-          filename: package.zip
-          exclusions: '*.git* *.idea* images/before.png images/after.png'
+      - name: build
+        run: zip -r extension.zip . -x images/before.png -x images/after.png -x .gitignore -x .git/\* -x README.md -x .github\/*
 
       - name: publish
-        uses: Klemensas/chrome-extension-upload-action@v1.3
-        with:
-          refresh-token: ${{secrets.CHROME_PUBLISH_REFRESH_TOKEN}}
-          client-id: ${{secrets.CHROME_PUBLISH_CLIENT_ID}}
-          client-secret: ${{secrets.CHROME_PUBLISH_CLIENT_SECRET}}
-          file-name: 'package.zip'
-          app-id: ${{secrets.CHROME_APP_ID}}
-          publish: true
+        run: npx chrome-webstore-upload-cli@2 upload --auto-publish --source extension.zip
+
+        env:
+          EXTENSION_ID: ${{ secrets.CHROME_APP_ID }}
+          CLIENT_ID: ${{ secrets.CHROME_PUBLISH_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CHROME_PUBLISH_CLIENT_SECRET }}
+          REFRESH_TOKEN: ${{ secrets.CHROME_PUBLISH_REFRESH_TOKEN }}
