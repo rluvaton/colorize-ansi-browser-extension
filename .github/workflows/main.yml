@@ -1,0 +1,27 @@
+name: publish
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: zip
+        uses: nguyenquyhy/zip-release@v0.3.0
+        with:
+          filename: package.zip
+          exclusions: '*.git* *.idea* images/before.png images/after.png'
+
+      - name: publish
+        uses: Klemensas/chrome-extension-upload-action@v1.3
+        with:
+          refresh-token: ${{secrets.CHROME_PUBLISH_REFRESH_TOKEN}}
+          client-id: ${{secrets.CHROME_PUBLISH_CLIENT_ID}}
+          client-secret: ${{secrets.CHROME_PUBLISH_CLIENT_SECRET}}
+          file-name: 'package.zip'
+          app-id: ${{secrets.CHROME_APP_ID}}
+          publish: true
