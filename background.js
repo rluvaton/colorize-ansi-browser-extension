@@ -622,3 +622,12 @@ chrome.action.onClicked.addListener((tab) => {
     });
   }
 });
+
+chrome.webNavigation.onCompleted.addListener(function(details) {
+  if (details.url.endsWith(".log")) {
+    chrome.scripting.executeScript({
+      target: { tabId: details.tabId },
+      function: colorizePre,
+    });
+  }
+});

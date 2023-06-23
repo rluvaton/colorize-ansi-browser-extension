@@ -9,7 +9,8 @@
   "description": "Replace <pre> tags that contains ansi colors with colored <pre> tags",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "webNavigation"
   ],
   "host_permissions": ["*://*/"],
   "background": {
