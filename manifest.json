@@ -2,7 +2,7 @@
   "name": "Colorize ANSI",
   "manifest_version": 3,
   "action": {},
-  "version": "0.2.1",
+  "version": "0.3.0",
   "icons": {
     "128": "images/icons/icon-128.png"
   },

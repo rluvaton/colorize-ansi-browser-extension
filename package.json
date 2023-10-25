@@ -11,6 +11,7 @@
   "author": "Raz Luvaton",
   "license": "ISC",
   "devDependencies": {
+    "expect": "^29.7.0",
     "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4"
   }

@@ -5,8 +5,11 @@ const fixturesInput = require('./fixtures/input');
 const fixturesSpanResults = require('./fixtures/span-result');
 
 const {parseAnsi} = require('../src/ansi-parser');
+const {expect} = require('expect');
 
 it('should match the snapshot', () => {
-    assert.deepEqual(parseAnsi(fixturesInput.fixture1Input), fixturesSpanResults.fixture1SpanResult);
+    const result = parseAnsi(fixturesInput.fixture1Input);
+
+    expect([...result]).toEqual(fixturesSpanResults.fixture1SpanResult);
 });
 
