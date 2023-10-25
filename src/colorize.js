@@ -1,52 +1,123 @@
-const {parseAnsi} = require('./ansi-parser');
+const { parseAnsi } = require("./ansi-parser");
 
-const parser = new DOMParser();
+let idCounter = 0;
 
-function decodeHtmlEntity(str) {
-    const dom = parser.parseFromString(
-        "<!doctype html><body>" + str,
-        "text/html"
-    );
-
-    return dom.body.textContent;
+function generateId() {
+  return `colorize-ansi-${idCounter++}`;
 }
 
-function createCode(item, extraStyle) {
-    const pre = document.createElement("pre");
+const commonClassesMap = new Map();
 
-    const newContent = document.createTextNode(decodeHtmlEntity(item.text));
-    pre.appendChild(newContent);
+function getClassNameForItemStyle(item) {
+  if (!item.css) {
+    return;
+  }
 
-    pre.style = item.css + "; " + extraStyle;
-    pre.style.display = "inline";
-    pre.style.margin = "0";
+  let className = commonClassesMap.get(item.css);
 
-    return pre;
+  if (className) {
+    return className;
+  }
+
+  className = generateId();
+
+  commonClassesMap.set(item.css, className);
+
+  // This is done to avoid creating a lot of CSS rules which can consume a lot of memory when there are a lot of pre elements
+  commonStyle.innerHTML += `
+#${uniqueContainerId} > pre.${className} {
+    ${item.css}
+}`;
+
+  return className;
 }
 
-function colorText(el, t, extraStyle) {
-    const spans = parseAnsi(t);
+function createCodeHtml(item) {
+  const className = getClassNameForItemStyle(item);
 
-    for (const span of spans) {
-        el.appendChild(createCode(span, extraStyle));
+  return (
+    "<pre" +
+    (className ? ` class="${className}"` : "") +
+    ">" +
+
+    // No worries of XSS here, it's already escaped as we take the html content as is
+    item.text +
+    "</pre>"
+  );
+}
+
+async function colorTextHtml({ el, getText }) {
+  let i = 0;
+  const spans = parseAnsi(getText);
+
+  const CHUNK_SIZE = 10000;
+  let childrenChunk = "";
+
+  for (const span of spans) {
+    childrenChunk += createCodeHtml(span);
+    i++;
+
+    if (i % CHUNK_SIZE === 0) {
+      el.innerHTML += childrenChunk;
+      childrenChunk = "";
+
+      // Avoid blocking the main thread
+      await new Promise((resolve) => setTimeout(resolve, 0));
     }
+  }
+
+  if (childrenChunk) {
+    el.innerHTML += childrenChunk;
+  }
 }
 
-const og = document.querySelector("pre");
-const ogStyle = og.computedStyleMap();
+let ansiContainer;
+let ogStyle;
+let cssText;
+
+// To avoid keeping the original pre element in memory
+{
+  const og = document.querySelector("pre");
+  ansiContainer = og.parentNode;
+  ogStyle = og.computedStyleMap();
+  cssText = og.style.cssText;
+}
 const marginTop = ogStyle.get("margin-top");
 const marginBottom = ogStyle.get("margin-bottom");
 const marginRight = ogStyle.get("margin-right");
 const marginLeft = ogStyle.get("margin-left");
-const text = og.innerHTML;
+
+const uniqueContainerId = generateId();
+
+// Common style to avoid recreating it for each pre, it will save a lot of memory when there are a lot of pre elements
+const commonStyle = document.createElement("style");
+commonStyle.innerHTML = `
+#${uniqueContainerId} > pre {
+    ${cssText};
+    display: inline;
+    margin: 0;
+}`;
+document.head.appendChild(commonStyle);
 
 const container = document.createElement("div");
 container.style.display = "inline";
-container.style.marginTop = marginTop + "";
-container.style.marginBottom = marginBottom + "";
-container.style.marginRight = marginRight + "";
-container.style.marginLeft = marginLeft + "";
+container.style.marginTop = `${marginTop}`;
+container.style.marginBottom = `${marginBottom}`;
+container.style.marginRight = `${marginRight}`;
+container.style.marginLeft = `${marginLeft}`;
+container.id = uniqueContainerId;
 
-colorText(container, text, og.style.cssText);
+ansiContainer.append(container);
 
-og.parentNode.replaceChildren(container);
+colorTextHtml({
+  el: container,
+  getText() {
+    const og = document.querySelector("pre");
+    const text = og.innerHTML;
+
+    // To avoid a lot of memory usage
+    og.parentNode.removeChild(og);
+
+    return text;
+  },
+});

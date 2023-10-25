@@ -6,11 +6,11 @@ const {rawAnsiParse} = require("./raw-ansi-parse");
 
 /**
  * Parse ansi text
- * @param ansiString string to parse
+ * @param getString get string to parse function
  * @param fullSpan should return full span with all the props or just the text and css
  * @return {Generator<{css: string, text}, void, *>}
  */
-function* parseAnsi(ansiString, fullSpan = false) {
+function* parseAnsi(getString, fullSpan = false) {
     let color = new Color();
     let bgColor = new Color(true /* background */);
     let brightness = undefined;
@@ -25,7 +25,7 @@ function* parseAnsi(ansiString, fullSpan = false) {
 
     reset();
 
-    const spansIterator = rawAnsiParse(ansiString);
+    const spansIterator = rawAnsiParse(getString);
 
     for (const span of spansIterator) {
         if (span.text.length === 0) {

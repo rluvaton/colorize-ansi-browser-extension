@@ -8,7 +8,7 @@ const {parseAnsi} = require('../src/ansi-parser');
 const {expect} = require('expect');
 
 it('should match the snapshot', () => {
-    const result = parseAnsi(fixturesInput.fixture1Input);
+    const result = parseAnsi(() => fixturesInput.fixture1Input);
 
     expect([...result]).toEqual(fixturesSpanResults.fixture1SpanResult);
 });

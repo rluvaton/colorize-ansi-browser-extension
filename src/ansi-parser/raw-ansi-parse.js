@@ -1,4 +1,5 @@
 const {Code} = require("./code");
+const prettyBytes = require("../../perf-tests/pretty-bytes");
 
 const TEXT = 0;
 const BRACKET = 1;
@@ -18,70 +19,96 @@ class Span {
     }
 }
 
-function* rawAnsiParse(s) {
-    let state = TEXT;
-    let buffer = "";
-    let text = "";
-    let code = "";
-    let codes = [];
+// getString as function instead of string to allow garbage collection
+function* rawAnsiParse(getString) {
+    const stateObject = {
+        state: TEXT,
+        buffer: '',
+        text: '',
+        code: '',
+        codes: [],
+    }
 
-    const chars = s.split("");
-    const charsLength = chars.length;
+    const chunks = splitStringToChunksOfSize(
+        getString(),
+        // 1 MB
+        1_048_576
+    );
+
+    while(chunks.length > 0) {
+        const chunk = chunks.shift();
+        yield * processChunk(chunk, stateObject);
+    }
+
+    if (stateObject.state !== TEXT) stateObject.text += stateObject.buffer;
+
+    if (stateObject.text) {
+        yield new Span(new Code(), stateObject.text);
+    }
+}
+
+function splitStringToChunksOfSize(str, chunkSize) {
+    const chunks = [];
+    const chunksLength = Math.ceil(str.length / chunkSize);
+
+    for (let i = 0, o = 0; i < chunksLength; ++i, o += chunkSize) {
+        chunks.push(str.substring(o, o + chunkSize));
+    }
+
+    return chunks;
+}
+
+function* processChunk(chunk, stateObject) {
+    const chars = chunk;
+    const charsLength = chunk.length;
 
     for (let i = 0; i < charsLength; i++) {
         const c = chars[i];
 
-        buffer += c;
+        stateObject.buffer += c;
 
-        switch (state) {
+        switch (stateObject.state) {
             case TEXT:
                 if (c === "\u001b") {
-                    state = BRACKET;
-                    buffer = c;
+                    stateObject.state = BRACKET;
+                    stateObject.buffer = c;
                 } else {
-                    text += c;
+                    stateObject.text += c;
                 }
                 break;
 
             case BRACKET:
                 if (c === "[") {
-                    state = CODE;
-                    code = "";
-                    codes = [];
+                    stateObject.state = CODE;
+                    stateObject.code = "";
+                    stateObject.codes = [];
                 } else {
-                    state = TEXT;
-                    text += buffer;
+                    stateObject.state = TEXT;
+                    stateObject.text += stateObject.buffer;
                 }
                 break;
 
             case CODE:
                 if (c >= "0" && c <= "9") {
-                    code += c;
+                    stateObject.code += c;
                 } else if (c === ";") {
-                    codes.push(new Code(code));
-                    code = "";
+                    stateObject.codes.push(new Code(stateObject.code));
+                    stateObject.code = "";
                 } else if (c === "m") {
-                    code = code || "0";
-                    for (const code of codes) {
-                        yield new Span(code, text);
-                        // spans.push({ text, code });
-                        text = "";
+                    stateObject.code = stateObject.code || "0";
+                    for (const code of stateObject.codes) {
+                        yield new Span(code, stateObject.text);
+                        stateObject.text = "";
                     }
 
-                    yield new Span(new Code(code), text);
-                    text = "";
-                    state = TEXT;
+                    yield new Span(new Code(stateObject.code), stateObject.text);
+                    stateObject.text = "";
+                    stateObject.state = TEXT;
                 } else {
-                    state = TEXT;
-                    text += buffer;
+                    stateObject.state = TEXT;
+                    stateObject.text += stateObject.buffer;
                 }
         }
-    }
-
-    if (state !== TEXT) text += buffer;
-
-    if (text) {
-        yield new Span(new Code(), text);
     }
 }
 
