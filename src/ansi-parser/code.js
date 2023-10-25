@@ -34,15 +34,6 @@ class Code {
         this.str = str;
         this.isBrightness = isBrightness;
     }
-
-    static str(x) {
-        if (x === undefined) {
-            return '';
-        }
-
-        // TODO - maybe remove the conversion to number before the string concatenation?
-        return "\u001b[" + Number(x) + "m";
-    }
 }
 
 module.exports = {Code};
