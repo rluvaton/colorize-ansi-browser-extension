@@ -2,7 +2,7 @@
   "name": "Colorize ANSI",
   "manifest_version": 3,
   "action": {},
-  "version": "0.2.0",
+  "version": "0.2.1",
   "icons": {
     "128": "images/icons/icon-128.png"
   },
@@ -14,6 +14,6 @@
   ],
   "host_permissions": ["*://*/"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "./dist/background.js"
   }
 }

@@ -1,3 +1,5 @@
 .idea
 extension.zip
 .DS_Store
+dist
+node_modules

@@ -11,8 +11,17 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
 
+      - name: install
+        run: npm ci
+
+      - name: Build JS
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
       - name: build
-        run: zip -r extension.zip . -x images/before.png -x images/after.png -x .gitignore -x .git/\* -x README.md -x .github\/*
+        run: zip -r extension.zip manifest.json images/icons/ LICENSE dist
 
       - name: publish
         run: npx chrome-webstore-upload-cli@2 upload --auto-publish --source extension.zip

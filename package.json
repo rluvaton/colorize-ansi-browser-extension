@@ -1,0 +1,17 @@
+{
+  "name": "colorize-ansi-browser-extension",
+  "version": "1.0.0",
+  "description": "<div align=\"center\">",
+  "main": "src/ansi-parser.js",
+  "scripts": {
+    "build": "webpack build && cp ./src/background.js ./dist/background.js",
+    "test": "node --test test/test.js"
+  },
+  "keywords": [],
+  "author": "Raz Luvaton",
+  "license": "ISC",
+  "devDependencies": {
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

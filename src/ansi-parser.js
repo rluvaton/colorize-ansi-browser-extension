@@ -1,7 +1,7 @@
 "use strict";
 
-function colorizePre() {
-  // --------------- The code below taken from ansicolor (https://github.com/xpl/ansicolor) ------------------------------
+function parseAnsi(textInput) {
+  // --------------- The code below Inspired by ansicolor (https://github.com/xpl/ansicolor) ------------------------------
 
   /*  ------------------------------------------------------------------------ */
 
@@ -559,75 +559,7 @@ function colorizePre() {
     lightCyan: [0, 204, 255],
   };
 
-  // --------------- The code above taken from ansicolor (https://github.com/xpl/ansicolor) ------------------------------
-
-  const parser = new DOMParser();
-
-  function decodeHtmlEntity(str) {
-    const dom = parser.parseFromString(
-      "<!doctype html><body>" + str,
-      "text/html"
-    );
-
-    return dom.body.textContent;
-  }
-
-  function createCode(item, extraStyle) {
-    const pre = document.createElement("pre");
-
-    const newContent = document.createTextNode(decodeHtmlEntity(item.text));
-    pre.appendChild(newContent);
-
-    pre.style = item.css + "; " + extraStyle;
-    pre.style.display = "inline";
-    pre.style.margin = "0";
-
-    return pre;
-  }
-
-  function colorText(el, t, extraStyle) {
-    const { spans } = Colors.parse(t);
-
-    spans.forEach((item) => {
-      el.appendChild(createCode(item, extraStyle));
-    });
-  }
-
-  const og = document.querySelector("pre");
-  const ogStyle = og.computedStyleMap();
-  const marginTop = ogStyle.get("margin-top");
-  const marginBottom = ogStyle.get("margin-bottom");
-  const marginRight = ogStyle.get("margin-right");
-  const marginLeft = ogStyle.get("margin-left");
-  const text = og.innerHTML;
-
-  const container = document.createElement("div");
-  container.style.display = "inline";
-  container.style.marginTop = marginTop + "";
-  container.style.marginBottom = marginBottom + "";
-  container.style.marginRight = marginRight + "";
-  container.style.marginLeft = marginLeft + "";
-
-  console.log(og.style.cssText);
-  colorText(container, text, og.style.cssText);
-
-  og.parentNode.replaceChildren(container);
+  return Colors.parse(textInput).spans;
 }
 
-chrome.action.onClicked.addListener((tab) => {
-  if (!tab.url.includes("chrome://")) {
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: colorizePre,
-    });
-  }
-});
-
-chrome.webNavigation.onCompleted.addListener(function(details) {
-  if (details.url.endsWith(".log")) {
-    chrome.scripting.executeScript({
-      target: { tabId: details.tabId },
-      function: colorizePre,
-    });
-  }
-});
+module.exports = {parseAnsi}
