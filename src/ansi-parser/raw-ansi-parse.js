@@ -1,5 +1,4 @@
 const {Code} = require("./code");
-const prettyBytes = require("../../perf-tests/pretty-bytes");
 
 const TEXT = 0;
 const BRACKET = 1;
