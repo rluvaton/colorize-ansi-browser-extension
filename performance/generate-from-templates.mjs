@@ -1,6 +1,6 @@
 import fs from "node:fs";
-import {readdir, stat} from "node:fs/promises";
-import {createGunzip} from "node:zlib";
+import {readdir, readFile, stat, writeFile} from "node:fs/promises";
+import {createGunzip, unzipSync} from "node:zlib";
 import {fileURLToPath} from "node:url";
 import {compose} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
@@ -73,11 +73,54 @@ async function generateFromTemplates(inFilePath, outFilePath) {
 
     console.time(`generate from template ${title}`);
 
-    const inputStream = fs.createReadStream(inFilePath);
-    const outputFileStream = fs.createWriteStream(outFilePath)
+    console.time(`generate from template ${title}: setup`);
+    let templateFile;
+    {
+        const rawFileContent = await readFile(inFilePath);
+        const unzippedFileContent = unzipSync(rawFileContent);
+        templateFile = unzippedFileContent.toString();
+    }
+    console.timeEnd(`generate from template ${title}: setup`);
 
-    await pipeline(inputStream, createParser(title), outputFileStream)
+    console.time(`generate from template ${title}: generate`);
 
+    let output = `<!DOCTYPE html><html translate="no"><head><title>${title}</title></head><body><pre>`;
+
+    const fileLength = templateFile.length;
+
+    let newPart = true;
+    let value = '';
+    let type = undefined
+
+    for (let i = 0; i < fileLength; i++) {
+        const char = templateFile[i];
+
+        if(newPart) {
+            type = char;
+            newPart = false;
+            continue;
+        }
+
+        if(char === '\x06') {
+            if (type === 's') {
+                output += value;
+            } else {
+                output += faker.lorem.word(parseInt(value));
+            }
+
+            newPart = true;
+            value = '';
+            type = undefined;
+            continue;
+        }
+
+        value += char;
+    }
+
+    output += `</pre></body></html>`
+    await writeFile(outFilePath, output);
+
+    console.timeEnd(`generate from template ${title}: generate`);
     console.timeEnd(`generate from template ${title}`);
 }
 
