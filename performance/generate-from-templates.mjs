@@ -1,72 +1,23 @@
-import fs from "node:fs";
 import {readdir, readFile, stat, writeFile} from "node:fs/promises";
-import {createGunzip, unzipSync} from "node:zlib";
+import {gunzipSync} from "node:zlib";
 import {fileURLToPath} from "node:url";
 import {compose} from 'node:stream';
-import {pipeline} from 'node:stream/promises';
 import path from "node:path";
-
-import {faker} from "@faker-js/faker";
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
+const CHARACTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+const CHARACTERS_LENGTH = CHARACTERS.length;
 
-function createAddHtml(title) {
-    return async function* addHtmlWrapping(stream) {
-        yield `<!DOCTYPE html><html translate="no"><head><title>${title}</title></head><body><pre>`;
-
-        for await (const chunk of stream) {
-            yield chunk;
-        }
-
-        yield '</pre></body></html>';
+function generateString(length) {
+    let result = '';
+    let counter = 0;
+    while (counter < length) {
+        result += CHARACTERS.charAt(Math.floor(Math.random() * CHARACTERS_LENGTH));
+        counter += 1;
     }
+    return result;
 }
-
-function* parsePart(part) {
-    const type = part[0];
-    const value = part.substring(1);
-
-    if (type === 's') {
-        yield value;
-    } else {
-        yield faker.lorem.word(parseInt(value))
-    }
-}
-
-async function* splitByDeliminator(stream) {
-    let last = '';
-
-    for await (const chunk of stream) {
-        last += chunk.toString();
-        const parts = last.split('\x06');
-
-        if (parts.length === 1) {
-            continue;
-        }
-
-        last = parts.pop();
-
-        for (const part of parts) {
-            yield* parsePart(part);
-        }
-    }
-
-    if (last) {
-        yield* parsePart(last);
-    }
-}
-
-function createParser(title) {
-    return compose(
-        createGunzip(),
-        splitByDeliminator,
-        // parseLine,
-        // generateItem,
-        createAddHtml(title),
-    )
-}
-
 
 async function generateFromTemplates(inFilePath, outFilePath) {
     const title = path.basename(outFilePath, '.html');
@@ -77,7 +28,7 @@ async function generateFromTemplates(inFilePath, outFilePath) {
     let templateFile;
     {
         const rawFileContent = await readFile(inFilePath);
-        const unzippedFileContent = unzipSync(rawFileContent);
+        const unzippedFileContent = gunzipSync(rawFileContent);
         templateFile = unzippedFileContent.toString();
     }
     console.timeEnd(`generate from template ${title}: setup`);
@@ -95,17 +46,17 @@ async function generateFromTemplates(inFilePath, outFilePath) {
     for (let i = 0; i < fileLength; i++) {
         const char = templateFile[i];
 
-        if(newPart) {
+        if (newPart) {
             type = char;
             newPart = false;
             continue;
         }
 
-        if(char === '\x06') {
+        if (char === '\x06') {
             if (type === 's') {
                 output += value;
             } else {
-                output += faker.lorem.word(parseInt(value));
+                output += generateString(parseInt(value));
             }
 
             newPart = true;
