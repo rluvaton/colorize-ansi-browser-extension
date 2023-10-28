@@ -1,7 +1,9 @@
+import fs from "node:fs";
 import {readdir, readFile, stat, writeFile} from "node:fs/promises";
-import {gunzipSync} from "node:zlib";
+import {createGunzip, gunzipSync} from "node:zlib";
 import {fileURLToPath} from "node:url";
 import {compose} from 'node:stream';
+import {pipeline} from 'node:stream/promises';
 import path from "node:path";
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -19,7 +21,78 @@ function generateString(length) {
     return result;
 }
 
-async function generateFromTemplates(inFilePath, outFilePath) {
+function createAddHtml(title) {
+    return async function* addHtmlWrapping(stream) {
+        yield `<!DOCTYPE html><html translate="no"><head><title>${title}</title></head><body><pre>`;
+
+        for await (const chunk of stream) {
+            yield chunk;
+        }
+
+        yield '</pre></body></html>';
+    }
+}
+
+function* parsePart(part) {
+    const type = part[0];
+    const value = part.substring(1);
+
+    if (type === 's') {
+        yield value;
+    } else {
+        yield generateString(parseInt(value))
+    }
+}
+
+async function* splitByDeliminator(stream) {
+    let last = '';
+
+    for await (const chunk of stream) {
+        last += chunk.toString();
+        const parts = last.split('\x06');
+
+        if (parts.length === 1) {
+            continue;
+        }
+
+        last = parts.pop();
+
+        for (const part of parts) {
+            yield* parsePart(part);
+        }
+    }
+
+    if (last) {
+        yield* parsePart(last);
+    }
+}
+
+function createParser(title) {
+    return compose(
+        createGunzip(),
+        splitByDeliminator,
+        createAddHtml(title),
+    )
+}
+
+
+// Really slow (for medium file instead of 8s, it's 1m
+async function generateFromTemplatesStream(inFilePath, outFilePath) {
+    const title = path.basename(outFilePath, '.html');
+
+    console.time(`generate from template ${title}`);
+
+    const inputStream = fs.createReadStream(inFilePath);
+    const outputFileStream = fs.createWriteStream(outFilePath)
+
+    await pipeline(inputStream, createParser(title), outputFileStream)
+
+    console.timeEnd(`generate from template ${title}`);
+}
+
+
+// Much, much faster but a memory hog (crash for big file)
+async function generateFromTemplatesSync(inFilePath, outFilePath) {
     const title = path.basename(outFilePath, '.html');
 
     console.time(`generate from template ${title}`);
@@ -101,5 +174,5 @@ const fileInDir = await getAllFilesInDirectory(path.join(__dirname, './templates
 for (const file of fileInDir) {
     const outFilePath = path.join(__dirname, './generated', path.basename(file, '.gzip') + '.html');
 
-    await generateFromTemplates(file, outFilePath);
+    await generateFromTemplatesSync(file, outFilePath);
 }
