@@ -3,3 +3,5 @@ extension.zip
 .DS_Store
 dist
 node_modules
+performance/generated
+!performance/generated/.gitkeep
