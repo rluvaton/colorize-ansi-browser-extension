@@ -1,36 +1,84 @@
-import {readFile, writeFile, readdir} from "node:fs/promises";
-import {unzipSync} from "node:zlib";
-import {faker} from "@faker-js/faker";
+import fs from "node:fs";
+import {readdir, stat} from "node:fs/promises";
+import {createGunzip} from "node:zlib";
 import {fileURLToPath} from "node:url";
+import {compose} from 'node:stream';
+import {pipeline} from 'node:stream/promises';
 import path from "node:path";
+
+import {faker} from "@faker-js/faker";
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
-function wrapWithHtml(title, text) {
-    return `<html><head><title>${title}</title></head><body><pre>${text}</pre></body></html>`;
+
+function createAddHtml(title) {
+    return async function* addHtmlWrapping(stream) {
+        yield `<!DOCTYPE html><html translate="no"><head><title>${title}</title></head><body><pre>`;
+
+        for await (const chunk of stream) {
+            yield chunk;
+        }
+
+        yield '</pre></body></html>';
+    }
 }
+
+function* parsePart(part) {
+    const type = part[0];
+    const value = part.substring(1);
+
+    if (type === 's') {
+        yield value;
+    } else {
+        yield faker.lorem.word(parseInt(value))
+    }
+}
+
+async function* splitByDeliminator(stream) {
+    let last = '';
+
+    for await (const chunk of stream) {
+        last += chunk.toString();
+        const parts = last.split('\x06');
+
+        if (parts.length === 1) {
+            continue;
+        }
+
+        last = parts.pop();
+
+        for (const part of parts) {
+            yield* parsePart(part);
+        }
+    }
+
+    if (last) {
+        yield* parsePart(last);
+    }
+}
+
+function createParser(title) {
+    return compose(
+        createGunzip(),
+        splitByDeliminator,
+        // parseLine,
+        // generateItem,
+        createAddHtml(title),
+    )
+}
+
 
 async function generateFromTemplates(inFilePath, outFilePath) {
     const title = path.basename(outFilePath, '.html');
-    let templateFile;
 
-    {
-        const rawFileContent = await readFile(inFilePath);
-        const unzippedFileContent = unzipSync(rawFileContent);
-        templateFile = JSON.parse(unzippedFileContent.toString());
-    }
+    console.time(`generate from template ${title}`);
 
-    let generatedFileContent = '';
+    const inputStream = fs.createReadStream(inFilePath);
+    const outputFileStream = fs.createWriteStream(outFilePath)
 
-    for (let item of templateFile) {
-        generatedFileContent += typeof item === 'string'
-            // predefined string
-            ? item
-            // Then a number that is the length of the string
-            : faker.lorem.word(item);
-    }
+    await pipeline(inputStream, createParser(title), outputFileStream)
 
-    await writeFile(outFilePath, wrapWithHtml(title, generatedFileContent));
+    console.timeEnd(`generate from template ${title}`);
 }
 
 async function getAllFilesInDirectory(dirPath) {
@@ -43,10 +91,15 @@ async function getAllFilesInDirectory(dirPath) {
         }
 
         const filePath = path.join(dirPath, file);
-        files.push(filePath);
+
+        const {size} = await stat(filePath)
+        files.push({path: filePath, size});
     }
 
-    return files;
+    return files
+        // Sort by size from smallest to largest
+        .sort((itemA, itemB) => itemA.size - itemB.size)
+        .map(item => item.path);
 }
 
 const fileInDir = await getAllFilesInDirectory(path.join(__dirname, './templates'));
