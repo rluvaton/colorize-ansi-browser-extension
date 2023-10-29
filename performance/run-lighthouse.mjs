@@ -89,7 +89,8 @@ async function openLocalHtmlFile(page, filePath) {
 }
 
 async function measureChromium() {
-    const pathToExtension = path.join(__dirname, '../', 'releases/v0.4.1/src');
+    const pathToExtension = path.join(__dirname, '../', 'releases/v0.1.2/src');
+    // const pathToExtension = path.join(__dirname, '../', 'releases/v0.4.0/src');
     const browser = await puppeteer.launch({
         headless: false,
         args: [
