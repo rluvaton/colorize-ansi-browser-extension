@@ -2,7 +2,7 @@
   "name": "Colorize ANSI",
   "manifest_version": 3,
   "action": {},
-  "version": "0.4.0",
+  "version": "0.4.1",
   "icons": {
     "128": "images/icons/icon-128.png"
   },
@@ -15,5 +15,6 @@
   "host_permissions": ["*://*/"],
   "background": {
     "service_worker": "./dist/background.js"
-  }
+  },
+  "homepage_url": "https://github.com/rluvaton/colorize-ansi-browser-extension"
 }
