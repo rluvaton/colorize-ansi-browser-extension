@@ -35,6 +35,9 @@ function getClassNameForItemStyle(item) {
 function createCodeHtml(item) {
   const className = getClassNameForItemStyle(item);
 
+  // For some reason the new lines are not rendered in the pre element, so we need to replace them with <br>
+  item.text = item.text.replace(/\n/g, "<br>");
+
   return (
     "<pre" +
     (className ? ` class="${className}"` : "") +
