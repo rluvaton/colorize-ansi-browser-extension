@@ -108,7 +108,25 @@ async function generateFromTemplatesSync(inFilePath, outFilePath) {
 
     console.time(`generate from template ${title}: generate`);
 
-    let output = `<!DOCTYPE html><html translate="no"><head><title>${title}</title></head><body><pre>`;
+    // styling for dark mode
+    let output = `<!DOCTYPE html>
+<html translate="no" lang="en">
+<head>
+    <title>${title}</title>
+    <style>
+
+/* If dark mode */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #000000c9;
+    color: white
+  }
+}
+
+</style>
+</head>
+<body>
+<pre>`;
 
     const fileLength = templateFile.length;
 
