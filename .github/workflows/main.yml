@@ -14,14 +14,11 @@ jobs:
       - name: install
         run: npm ci
 
-      - name: Build JS
-        run: npm run build
-
       - name: Test
         run: npm test
 
-      - name: build
-        run: zip -r extension.zip manifest.json images/icons/ LICENSE dist
+      - name: Build JS and Pack Extension
+        run: npm run build
 
       - name: publish
         run: npx chrome-webstore-upload-cli@2 upload --auto-publish --source extension.zip
