@@ -1,4 +1,4 @@
-const { parseAnsi } = require("./ansi-parser");
+import {parseAnsi} from "./ansi-parser/index.js";
 
 let idCounter = 0;
 

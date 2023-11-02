@@ -1,11 +1,12 @@
-const assert = require('node:assert');
-const {it} = require('node:test');
+import {it} from "node:test";
+import {expect} from "expect";
 
-const fixturesInput = require('./fixtures/input');
-const fixturesSpanResults = require('./fixtures/span-result');
+import * as fixturesInput from "./fixtures/input.js";
+import * as fixturesSpanResults from "./fixtures/span-result.js";
 
-const {parseAnsi} = require('../src/ansi-parser');
-const {expect} = require('expect');
+import {parseAnsi} from "../src/ansi-parser/index.js";
+
+
 
 it('should match the snapshot', () => {
     const result = parseAnsi(() => fixturesInput.fixture1Input);

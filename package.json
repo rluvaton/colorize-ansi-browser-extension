@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "<div align=\"center\">",
   "main": "src/ansi-parser.js",
+  "type": "module",
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test test/test.js"

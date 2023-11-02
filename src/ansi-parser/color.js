@@ -1,7 +1,8 @@
-const {Code} = require("./code");
-const {asBright, RGB} = require("./constants");
+import {Code} from "./code.js";
 
-class Color {
+import {asBright, RGB} from "./constants.js";
+
+export class Color {
     constructor(background, name, brightness) {
         this.background = background;
         this.name = name;
@@ -63,5 +64,3 @@ class Color {
                 : ""; // Chrome does not support 'opacity' property...
     }
 }
-
-module.exports = {Color};

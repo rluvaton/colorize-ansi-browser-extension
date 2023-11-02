@@ -1,5 +1,5 @@
 
-const colorCodes = [
+export const colorCodes = [
     "black",
     "red",
     "green",
@@ -11,7 +11,8 @@ const colorCodes = [
     "",
     "default",
 ];
-const colorCodesLight = [
+
+export const colorCodesLight = [
     "darkGray",
     "lightRed",
     "lightGreen",
@@ -22,7 +23,8 @@ const colorCodesLight = [
     "white",
     "",
 ];
-const styleCodes = [
+
+export const styleCodes = [
     "",
     "bright",
     "dim",
@@ -32,7 +34,8 @@ const styleCodes = [
     "",
     "inverse",
 ];
-const asBright = {
+
+export const asBright = {
     red: "lightRed",
     green: "lightGreen",
     yellow: "lightYellow",
@@ -42,7 +45,8 @@ const asBright = {
     black: "darkGray",
     lightGray: "white",
 };
-const types = {
+
+export const types = {
     0: "style",
     2: "unstyle",
     3: "color",
@@ -50,7 +54,8 @@ const types = {
     4: "bgColor",
     10: "bgColorLight",
 };
-const subtypes = {
+
+export const subtypes = {
     color: colorCodes,
     colorLight: colorCodesLight,
     bgColor: colorCodes,
@@ -59,7 +64,7 @@ const subtypes = {
     unstyle: styleCodes,
 };
 
-const RGB = {
+export const RGB = {
     black: [0, 0, 0],
     darkGray: [100, 100, 100],
     lightGray: [200, 200, 200],
@@ -83,13 +88,3 @@ const RGB = {
     cyan: [0, 153, 255],
     lightCyan: [0, 204, 255],
 };
-
-module.exports = {
-    colorCodes,
-    colorCodesLight,
-    styleCodes,
-    asBright,
-    types,
-    subtypes,
-    RGB
-}

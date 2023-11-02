@@ -1,6 +1,6 @@
-const {types, subtypes} = require("./constants");
+import {subtypes, types} from "./constants.js";
 
-class Code {
+export class Code {
     static reset = 0;
     static bright = 1;
     static dim = 2;
@@ -35,5 +35,3 @@ class Code {
         this.isBrightness = isBrightness;
     }
 }
-
-module.exports = {Code};

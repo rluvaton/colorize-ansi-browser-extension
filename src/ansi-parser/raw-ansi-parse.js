@@ -1,4 +1,4 @@
-const {Code} = require("./code");
+import {Code} from "./code.js";
 
 const TEXT = 0;
 const BRACKET = 1;
@@ -19,7 +19,7 @@ class Span {
 }
 
 // getString as function instead of string to allow garbage collection
-function* rawAnsiParse(getString) {
+export function* rawAnsiParse(getString) {
     const stateObject = {
         state: TEXT,
         buffer: '',
@@ -111,4 +111,3 @@ function* processChunk(chunk, stateObject) {
     }
 }
 
-module.exports = {rawAnsiParse};

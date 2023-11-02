@@ -19,7 +19,18 @@ const zipPath = path.join(rootDir, 'extension.zip');
  * @return {Promise<unknown>}
  */
 function webpack(options) {
-    return new Promise((resolve, reject) => webpackCallbacks(options, (err, stats) => err || stats.hasErrors() ? reject(err || stats) : resolve(stats)));
+    return new Promise((resolve, reject) => webpackCallbacks(options, (err, stats) => {
+        if(err) {
+            return reject(err);
+        }
+
+        if(stats.hasErrors()) {
+            const errors = stats.compilation.errors;
+            return reject(errors.length > 1 ? errors : errors[0]);
+        }
+
+        resolve();
+    }));
 }
 
 // 1. Delete previously generated zip file and dist folder

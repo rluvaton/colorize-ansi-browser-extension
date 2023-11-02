@@ -1,4 +1,4 @@
-const fixture1Input = `\x1b[0m Reset
+export const fixture1Input = `\x1b[0m Reset
 \x1b[1m Bold
 \x1b[2m Faint
 \x1b[3m Italic
@@ -41,6 +41,3 @@ const fixture1Input = `\x1b[0m Reset
 \x1b[106m Bright Cyan Background
 \x1b[107m Bright White Background`
 
-module.exports = {
-    fixture1Input
-}

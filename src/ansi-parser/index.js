@@ -1,8 +1,9 @@
 "use strict";
 
-const {Code} = require("./code");
-const {Color} = require("./color");
-const {rawAnsiParse} = require("./raw-ansi-parse");
+import {Code} from "./code.js";
+import {Color} from "./color.js";
+import {rawAnsiParse} from "./raw-ansi-parse.js";
+
 
 /**
  * Parse ansi text
@@ -10,7 +11,7 @@ const {rawAnsiParse} = require("./raw-ansi-parse");
  * @param fullSpan should return full span with all the props or just the text and css
  * @return {Generator<{css: string, text}, void, *>}
  */
-function* parseAnsi(getString, fullSpan = false) {
+export function* parseAnsi(getString, fullSpan = false) {
     let color = new Color();
     let bgColor = new Color(true /* background */);
     let brightness = undefined;
@@ -92,5 +93,3 @@ function* parseAnsi(getString, fullSpan = false) {
         }
     }
 }
-
-module.exports = {parseAnsi}

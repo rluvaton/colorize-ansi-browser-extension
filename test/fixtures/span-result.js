@@ -1,4 +1,4 @@
-const fixture1SpanResult = [
+export const fixture1SpanResult = [
     {
         text: " Reset\n",
         css: ""
@@ -169,6 +169,3 @@ const fixture1SpanResult = [
     }
 ]
 
-module.exports = {
-    fixture1SpanResult
-}
