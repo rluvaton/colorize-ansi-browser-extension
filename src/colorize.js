@@ -1,4 +1,4 @@
-import {parseAnsi} from "./ansi-parser/index.js";
+import {parseIterator} from "ansicolor";
 
 let idCounter = 0;
 
@@ -51,7 +51,7 @@ function createCodeHtml(item) {
 
 async function colorTextHtml({ el, getText }) {
   let i = 0;
-  const spans = parseAnsi(getText);
+  const spans = parseIterator(getText);
 
   const CHUNK_SIZE = 10000;
   let childrenChunk = "";
