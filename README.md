@@ -22,4 +22,4 @@
 The icon was taken from https://github.com/iliazeus/vscode-ansi
 
 
-Available as standalone program with support for large files [here](https://github.com/rluvaton/electron-ansi-viewer)
+Available as standalone program with support for large files [here](https://github.com/rluvaton/ansi-viewer)
